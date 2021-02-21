@@ -1,25 +1,57 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '../views/Home.vue';
+import Login from '@/views/auth/Login.vue';
+import Register from '@/views/auth/Register.vue';
+import Dashboard from '@/views/dashboard/Dashboard.vue';
+import Workout from '@/views/dashboard/Workout.vue';
+import DailyFood from '@/views/dashboard/DailyFood.vue';
+import Newsfeed from '@/views/newsfeed/Newsfeed.vue';
+import UserSettings from '@/views/settings/UserSettings.vue';
+
+export const LOGIN_ROUTE = '/login';
+export const REGISTER_ROUTE = '/register';
+
+export const DASHBOARD_ROUTE = '/dashboard';
 
 const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: Home,
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
-  },
+	{
+		path: '/',
+		redirect: LOGIN_ROUTE,
+	},
+	{
+		path: LOGIN_ROUTE,
+		name: 'Login',
+		component: Login,
+	},
+	{
+		path: REGISTER_ROUTE,
+		name: 'Register',
+		component: Register,
+	},
+	{
+		path: DASHBOARD_ROUTE,
+		name: 'Dashboard',
+		component: Dashboard,
+		children: [{
+			path: 'workout',
+			component: Workout,
+		}, {
+			path: 'food',
+			component: DailyFood,
+		}, {
+			path: 'newsfeed',
+			component: Newsfeed,
+		},
+		{
+			path: 'settings',
+			component: UserSettings,
+		},
+		],
+	},
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-  routes,
+	history: createWebHistory(process.env.BASE_URL),
+	routes,
 });
 
 export default router;

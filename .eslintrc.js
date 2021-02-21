@@ -13,5 +13,18 @@ module.exports = {
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+	  "indent": ["error", "tab"],
+	  'no-tabs': ["error", { allowIndentationTabs: true }],
+	  'max-len': ["error", { "code": 120, "tabWidth": 4 }],
+	  "vue/max-attributes-per-line": ["error", {
+		  "singleline": 1,
+		  "multiline": {
+			  "max": 1,
+			  "allowFirstLine": false
+		  }
+	  }],
+	  "import/prefer-default-export": "off",
+	  "no-unused-vars": "off",
+	  "import/no-cycle": "off"
   },
 };
