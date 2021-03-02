@@ -12,7 +12,7 @@
 				<p>
 					<strong>@{{ username }}</strong> <small>{{createdAgoText}}</small>
 					<br>
-					{{ text }}
+					{{ comment }}
 				</p>
 			</div>
 			<nav class="level is-mobile">
@@ -37,12 +37,12 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, defineComponent, computed } from 'vue';
 
-export default {
+export default defineComponent({
 	name: 'Comment',
 	props: {
-		text: {
+		comment: {
 			type: String,
 			required: true,
 		},
@@ -67,14 +67,22 @@ export default {
 			required: true,
 		},
 	},
-	setup() {
-		const isCommenting = ref(false);
+	setup(props) {
+		const createdAgoText = computed(() => {
+			if (props.createdAgo.seconds && props.createdAgo.seconds === 'now') {
+				return 'Just now';
+			}
+
+			const time = Object.entries(props.createdAgo);
+
+			return `${Math.round(time[0][1])} ${time[0][0]} ago`;
+		});
 
 		return {
-			isCommenting,
+			createdAgoText,
 		};
 	},
-};
+});
 </script>
 
 <style scoped lang="scss">

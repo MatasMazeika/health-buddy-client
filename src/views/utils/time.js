@@ -1,6 +1,6 @@
-import moment from 'moment';
+import { DateTime } from 'luxon';
 
 export const getStartAndEndTimeOfToday = () => ({
-	startDate: moment().startOf('day'),
-	endDate: moment().endOf('day'),
+	startDate: DateTime.local().startOf('day'),
+	endDate: DateTime.local().endOf('day'),
 });

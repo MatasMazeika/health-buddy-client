@@ -24,7 +24,8 @@ const currentEditingExerciseIndex = ref(null);
 const isAddExerciseModalVisible = ref(false);
 const iseEditSetModalVisible = ref(false);
 
-export const exerciseStore = () => {
+export const exerciseStore = (props, context) => {
+	console.log(context);
 	const isSaveExerciseAllowed = computed(() => currentAddingSets.value.length > 0 && exercise.value.name !== null);
 
 	const startSetEditing = ({

@@ -36,8 +36,12 @@
 				</div>
 			</nav>
 			<Comment
-				v-for="comment in comments"
+				v-for="{ username, avatar, createdAgo, comment } in comments"
 				:key="comment.id"
+				:username="username"
+				:avatar="avatar"
+				:createdAgo="createdAgo"
+				:comment="comment"
 			/>
 			<div
 				class="field is-relative"
@@ -66,15 +70,17 @@
 	</article>
 </template>
 
-<script>
-import { ref } from 'vue';
+<script lang="ts">
+import {
+	ref, defineComponent, computed, PropType,
+} from 'vue';
 import { userDataStore } from '@/store/userDataStore';
-import TextareaAutosize from 'vue-textarea-autosize';
 import Comment from '@/views/newsfeed/Comment.vue';
 import { useTextArea } from '@/use/useTextArea';
 import { useNewsfeedStore } from '@/store/newsfeedStore';
+import { CreatedAgo, Like } from '@/store/interface/newsfeedStoreInterface';
 
-export default {
+export default defineComponent({
 	name: 'Post',
 	components: { Comment },
 	props: {
@@ -91,7 +97,7 @@ export default {
 			required: true,
 		},
 		createdAgo: {
-			type: Object,
+			type: Object as PropType<CreatedAgo>,
 			required: true,
 		},
 		id: {
@@ -99,7 +105,7 @@ export default {
 			required: true,
 		},
 		likes: {
-			type: Array,
+			type: Array as PropType<Like[]>,
 			required: true,
 		},
 		comments: {
@@ -111,14 +117,14 @@ export default {
 		const { userDetails } = userDataStore();
 		const { addComment } = useNewsfeedStore();
 		const { myTextArea, content } = useTextArea();
-		const comment = ref('');
+		const comment = ref<string>('');
 		const isCommenting = ref(false);
 
 		const resetCommentInput = () => {
-			comment.value = '';
+			content.value = '';
 		};
 
-		const setIsCommenting = (value) => {
+		const setIsCommenting = (value: boolean) => {
 			isCommenting.value = value;
 
 			if (!value) {
@@ -128,7 +134,23 @@ export default {
 
 		const handleCommentAdd = () => {
 			addComment(content.value, props.id);
+			setIsCommenting(false);
 		};
+
+		const likeCount = computed(() => props.likes.length);
+
+		const hasLikedPost = computed(() => !!props.likes
+			.find((like: Like): Boolean => like.username === userDetails.value.username));
+
+		const createdAgoText = computed(() => {
+			if (props.createdAgo.seconds && props.createdAgo.seconds === 'now') {
+				return 'Just now';
+			}
+
+			const time = Object.entries(props.createdAgo);
+
+			return `${Math.round(time[0][1])} ${time[0][0]} ago`;
+		});
 
 		return {
 			userDetails,
@@ -136,28 +158,14 @@ export default {
 			isCommenting,
 			myTextArea,
 			content,
+			likeCount,
+			hasLikedPost,
+			createdAgoText,
 			handleCommentAdd,
 			setIsCommenting,
 		};
 	},
-	computed: {
-		likeCount: ({ likes }) => likes.length,
-		hasLikedPost: ({ likes, userDetails }) => {
-			console.log(likes);
-			return !!likes.find((like) => like.username === userDetails.username);
-		},
-		createdAgoText: ({ createdAgo }) => {
-			console.log(createdAgo);
-			if (createdAgo.seconds && createdAgo.seconds === 'now') {
-				return 'Just now';
-			}
-
-			const time = Object.entries(createdAgo);
-
-			return `${Math.round(time[0][1])} ${time[0][0]} ago`;
-		},
-	},
-};
+});
 </script>
 
 <style scoped lang="scss">

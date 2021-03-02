@@ -3,10 +3,12 @@ import {
 	addCommentApi,
 	addPostApi, editPostApi, getPostsApi, likePostApi, unlikePostApi,
 } from '@/api/newsfeedApi';
+import { DateTime } from 'luxon';
 import { userDataStore } from '@/store/userDataStore';
+import { Comment, Post } from '@/store/interface/newsfeedStoreInterface';
 
-const posts = ref([]);
-const postText = ref('');
+const posts = ref<Post[]>([]);
+const postText = ref<string>('');
 
 export const useNewsfeedStore = () => {
 	const { userDetails } = userDataStore();
@@ -15,25 +17,41 @@ export const useNewsfeedStore = () => {
 		postText.value = '';
 	};
 
-	const editPostById = (postId, editedText) => {
+	const editPostById = (postId: number, editedText: string) => {
 		const postIndex = posts.value.findIndex((_post) => _post.id === postId);
 
 		posts.value[postIndex].text = editedText;
 	};
 
-	const likePostByPostIndex = (postIndex) => {
+	const likePostByPostIndex = (postIndex: number, postId: number) => {
 		posts.value[postIndex].likes.push({
 			username: userDetails.value.username,
+			postId,
 		});
 	};
 
-	const removePostLikeByPostIndex = (postIndex) => {
+	const removePostLikeByPostIndex = (postIndex: number) => {
 		posts.value[postIndex].likes = posts.value[postIndex].likes
 			.filter((like) => like.username !== userDetails.value.username);
 	};
 
-	const addPostToList = (newPost) => {
+	const addPostToList = (newPost: Post) => {
 		posts.value.unshift({ ...newPost, username: userDetails.value.username, avatar: userDetails.value.avatar });
+	};
+
+	const addCommentToList = (postId: number, commentText: string) => {
+		const postIndex = posts.value.findIndex((_post) => _post.id === postId);
+
+		posts.value[postIndex].comments.unshift({
+			username: userDetails.value.username,
+			avatar: userDetails.value.avatar,
+			comment: commentText,
+			createdAgo: { seconds: 'now' },
+			createdAt: DateTime.local().toJSDate(),
+			postId,
+		});
+
+		console.log(posts.value[postIndex].comments);
 	};
 
 	const getPosts = async () => {
@@ -63,25 +81,25 @@ export const useNewsfeedStore = () => {
 		try {
 			await editPostApi({ text: postText.value });
 
-			editPostById();
+			// editPostById();
 			resetPostInput();
 		} catch (error) {
 			console.log(error);
 		}
 	};
 
-	const likePost = async (postId, postIndex) => {
+	const likePost = async (postId: number, postIndex: number) => {
 		console.log(postId);
 		try {
 			await likePostApi({ postId });
 
-			likePostByPostIndex(postIndex);
+			likePostByPostIndex(postIndex, postId);
 		} catch (error) {
 			console.error(error);
 		}
 	};
 
-	const unlikePost = async (postId, postIndex) => {
+	const unlikePost = async (postId: number, postIndex: number) => {
 		try {
 			console.log(postId);
 			await unlikePostApi({ postId });
@@ -92,9 +110,11 @@ export const useNewsfeedStore = () => {
 		}
 	};
 
-	const addComment = async (comment, postId) => {
+	const addComment = async (commentText: string, postId: number) => {
 		try {
-			await addCommentApi({ comment, postId });
+			await addCommentApi({ comment: commentText, postId });
+
+			addCommentToList(postId, commentText);
 		} catch (error) {
 			console.error(error);
 		}

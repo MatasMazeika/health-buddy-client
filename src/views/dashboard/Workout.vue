@@ -58,10 +58,10 @@ import EditSetModal from '@/views/dashboard/modals/EditSetModal.vue';
 
 export default {
 	components: { EditSetModal, AddNewExerciseModal },
-	setup() {
+	setup(props, context) {
 		const {
 			isAddExerciseModalVisible, iseEditSetModalVisible, dayExercises, startSetEditing, editExercise,
-		} = exerciseStore();
+		} = exerciseStore(props, context);
 
 		console.log(dayExercises);
 

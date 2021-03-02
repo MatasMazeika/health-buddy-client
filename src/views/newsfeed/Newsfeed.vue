@@ -34,7 +34,7 @@
 			</article>
 			<div class="news-feed__posts">
 				<Post
-					v-for="{ id, text, username, likes, avatar, createdAgo } in posts"
+					v-for="{ id, text, username, likes, avatar, createdAgo, comments } in posts"
 					:key="id"
 					:text="text"
 					:username="username"
@@ -42,6 +42,7 @@
 					:likes="likes"
 					:avatar="avatar"
 					:createdAgo="createdAgo"
+					:comments="comments"
 					@post-liked="handlePostLike($event)"
 				/>
 			</div>

@@ -2,13 +2,13 @@
 	<div class="container p-6">
 		<div class="tile is-ancestor">
 			<div class="tile is-4 is-vertical is-parent">
-				<div>
+				<div class="tile is-child box is-flex-grow-0 mb-6">
+					<DailyCaloricIntake />
+				</div>
+				<div class="tile is-child is-flex-grow-0">
 					<DatePicker
 						v-model="date"
 						:masks='{ input:["L", "YYYY-MM-DD", "YYYY/MM/DD"] }'/>
-				</div>
-				<div>
-					<img id="yourElement">
 				</div>
 			</div>
 			<div class="tile is-parent">
@@ -34,13 +34,14 @@ import { ref, watch } from 'vue';
 import { DatePicker } from 'v-calendar';
 import { userDataStore } from '@/store/userDataStore';
 import FoodTable from '@/views/dashboard/FoodTable.vue';
+import DailyCaloricIntake from '@/views/dashboard/DailyCaloricIntake';
 import { DateTime } from 'luxon';
 import axios from 'axios';
 
 export default {
 	name: 'Dashboard',
 	components: {
-		FoodTable, DatePicker,
+		FoodTable, DatePicker, DailyCaloricIntake,
 	},
 	data() {
 		return {
@@ -101,6 +102,7 @@ export default {
 							this.hasDetected = true;
 						}
 						console.log(resultt);
+						// eslint-disable-next-line camelcase
 						this.imgUrl = resultt?.data?.product?.image_front_url;
 					});
 				}
