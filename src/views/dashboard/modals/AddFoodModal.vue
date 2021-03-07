@@ -4,80 +4,66 @@
 		<div class="modal-background"></div>
 		<div class="modal-content">
 			<div class="box">
-				<label class="label has-text-left">Enter food:</label>
-				<input
-					class="input is-normal"
-					:class="{
-					'is-loading': isLoadingUserFood
-					}"
-					type="text"
-					placeholder="Enter food name"
-					v-model.trim="foodName"
-				>
-				<div class="mt-2 mb-6">
-					<p
-						v-for="food in uniqueLoadedFood"
-						:key="`${food.name}${food.calories}`"
-						class="food p-2 has-text-left"
-						@click="selectFood(food)"
-					>
-						{{ food.name }} <span>{{ food.calories }}</span>
-					</p>
-				</div>
-				<div class="columns">
-					<div class="column">
-						<p class="has-text-left mb-2">Total calories: {{ selectedFoodWithAmount.calories }}</p>
-						<label class="label macro-label">Protein {{ selectedFoodWithAmount.protein }}g
-							<span class="has-text-primary ml-2">({{ selectedFoodPercentages.protein }}%)</span></label>
-						<progress
-							class="progress is-small is-primary"
-							:value="selectedFoodPercentages.protein"
-							max="100">20%
-						</progress>
-						<label class="label macro-label">Carbohydrates {{ selectedFoodWithAmount.carbs }}g
-							<span class="has-text-info ml-2">({{ selectedFoodPercentages.carbs }}%)</span></label>
-						<progress
-							class="progress is-small is-info"
-							:value="selectedFoodPercentages.carbs"
-							max="100">20%
-						</progress>
-						<label class="label macro-label">Fat {{ selectedFoodWithAmount.fat }}g
-							<span class="has-text-danger ml-2">({{ selectedFoodPercentages.fat }}%)</span></label>
-						<progress
-							class="progress is-small is-danger"
-							:value="selectedFoodPercentages.fat"
-							max="100">20%
-						</progress>
+				<article class="panel is-primary">
+					<div class="is-flex is-align-items-center is-justify-content-space-between panel-heading">
+						<b>Select Meal</b>
 					</div>
-					<div
-						class="
-						column
-						is-flex
-						is-flex-direction-column
-						is-justify-content-center
-						is-align-items-flex-start
-						"
-					>
-						<div class="control has-icons-right amount-input">
-							<input
-								class="input"
-								type="number"
-								placeholder="Amount in grams"
-								v-model.number="selectedAmount"
-							>
-							<span class="icon is-small gram-input-postfix">g.</span>
-						</div>
-						<button
-							class="button is-info mt-2"
-							@click="handleFoodAdd"
+					<p class="panel-tabs">
+						<a
+							v-for="tab in TABS"
+							:key="tab.id"
+							:class="{
+								'is-active': currentTab.id === tab.id
+							}"
+							@click="setCurrentTab(tab)"
 						>
-							<span class="icon is-small">
-								<i class="fas fa-check"></i>
+							{{ tab.title }}
+						</a>
+					</p>
+					<div v-if="!isAddFoodTabOpen">
+						<div class="panel-block">
+							<p class="control has-icons-left">
+								<input
+									class="input is-normal"
+									:class="{
+									'is-loading': isLoadingUserFood
+								}"
+									type="text"
+									placeholder="Enter food name"
+									v-model.trim="foodName"
+								>
+								<span class="icon is-left">
+								<i
+									class="fas fa-search"
+									aria-hidden="true"></i>
+								</span>
+							</p>
+						</div>
+						<a
+							class="panel-block is-active"
+							v-for="food in uniqueLoadedFood"
+							:key="`${food.name}${food.calories}`"
+							@click="selectFood(food)"
+						>
+							<span class="panel-icon">
+								<i class="fas fa-drumstick-bite"></i>
 							</span>
-							<span>Add</span>
-						</button>
+							<span>
+								{{ food.name }}
+							</span>
+						</a>
 					</div>
-				</div>
+				</article>
+				<component :is="currentTab.component"/>
+				<footer class="modal-card-foot">
+					<button
+						class="button is-success"
+						@click="handleFoodAdd"
+					>
+						Add
+					</button>
+					<button class="button">Cancel</button>
+				</footer>
 			</div>
 		</div>
 		<button
@@ -89,9 +75,35 @@
 </template>
 
 <script>
+import { ref, computed } from 'vue';
 import { addFoodStore } from '@/store/addFoodStore';
+import AddFoodModalAddNewFood from '@/views/dashboard/modals/AddFoodModalAddNewFood.vue';
+import AddFoodModalSelectFood from '@/views/dashboard/modals/AddFoodModalSelectFood.vue';
+
+const TAB_ID_ADD_FOOD = 'add-food';
+
+const TABS = [
+	{
+		title: 'Recent',
+		component: 'AddFoodModalSelectFood',
+		id: 'recent',
+	},
+	{
+		title: 'Add food',
+		component: 'AddFoodModalAddNewFood',
+		id: TAB_ID_ADD_FOOD,
+	},
+	{
+		title: 'Meals',
+		id: 'meals',
+	},
+];
 
 export default {
+	components: {
+		AddFoodModalSelectFood,
+		AddFoodModalAddNewFood,
+	},
 	props: {
 		isOpen: {
 			type: Boolean,
@@ -100,7 +112,8 @@ export default {
 	},
 	setup(props, { emit }) {
 		const {
-			saveFood,
+			saveConsumedFood,
+			addFood,
 			uniqueLoadedFood,
 			foodName,
 			loadedFood,
@@ -109,17 +122,33 @@ export default {
 			selectedFood,
 			selectedFoodPercentages,
 			selectedFoodWithAmount,
-			selectedAmount,
+			addFoodData,
 		} = addFoodStore();
+		const currentTab = ref(TABS[0]);
 
-		const handleFoodAdd = () => {
-			saveFood();
+		const isAddFoodTabOpen = computed(() => currentTab.value.id === TAB_ID_ADD_FOOD);
+
+		const setCurrentTab = (tab) => {
+			currentTab.value = tab;
+		};
+
+		const handleFoodAdd = async () => {
+			if (currentTab.value.id === TAB_ID_ADD_FOOD) {
+				await addFood();
+			} else {
+				saveConsumedFood();
+			}
+
 			emit('close');
 		};
 
 		return {
+			TABS,
+			currentTab,
 			handleFoodAdd,
-			saveFood,
+			saveConsumedFood,
+			setCurrentTab,
+			isAddFoodTabOpen,
 			uniqueLoadedFood,
 			foodName,
 			loadedFood,
@@ -128,7 +157,7 @@ export default {
 			selectedFood,
 			selectedFoodPercentages,
 			selectedFoodWithAmount,
-			selectedAmount,
+			addFoodData,
 		};
 	},
 };
