@@ -14,11 +14,24 @@
 						<p class="control">
 							<textarea
 								class="textarea"
-								placeholder="Write a post"
+								placeholder="appWrite a post"
 								v-model.trim="postText"
-							></textarea>
+							/>
 						</p>
 					</div>
+					<NewsfeedMealDisplay
+						:meal-name="selectedMealToShare.mealName"
+						:meal-foods="selectedMealToShare.mealFoods"
+						:total-amount="selectedMealToShare.totalAmount"
+						:total-carbs="selectedMealToShare.totalCarbs"
+						:total-fat="selectedMealToShare.totalFat"
+						:total-protein="selectedMealToShare.totalProtein"
+						:total-calories="selectedMealToShare.totalCalories"
+					/>
+					<MealSelection
+						v-if="isShareMealSelectionVisible"
+						@meal-selected="selectMealToShare($event)"
+					/>
 					<nav class="level">
 						<div class="level-left">
 							<div class="is-flex is-align-items-center">
@@ -26,7 +39,7 @@
 									class="button is-info mr-5"
 									@click="addPost">Submit</a>
 								<a class="mr-5">Add a workout</a>
-								<a>Add a eaten food</a>
+								<a @click="setShareMealSelectionVisible(true)">Share meal</a>
 							</div>
 						</div>
 					</nav>
@@ -34,7 +47,7 @@
 			</article>
 			<div class="news-feed__posts">
 				<Post
-					v-for="{ id, text, username, likes, avatar, createdAgo, comments } in posts"
+					v-for="{ id, text, username, likes, avatar, createdAgo, comments, meal } in posts"
 					:key="id"
 					:text="text"
 					:username="username"
@@ -43,6 +56,7 @@
 					:avatar="avatar"
 					:createdAgo="createdAgo"
 					:comments="comments"
+					:meal="meal"
 					@post-liked="handlePostLike($event)"
 				/>
 			</div>
@@ -50,25 +64,29 @@
 	</div>
 </template>
 
-<script>
+<script lang="ts">
+import { ref, defineComponent } from 'vue';
 import { userDataStore } from '@/store/userDataStore';
 import { useNewsfeedStore } from '@/store/newsfeedStore';
 import Post from '@/views/newsfeed/Post.vue';
+import MealSelection from '@/views/newsfeed/MealSelection.vue';
+import NewsfeedMealDisplay from '@/views/newsfeed/NewsfeedMealDisplay.vue';
 
-export default {
+export default defineComponent({
 	name: 'Newsfeed',
-	components: { Post },
+	components: { Post, MealSelection, NewsfeedMealDisplay },
 	setup() {
 		const { userDetails } = userDataStore();
 		const {
-			posts, postText, addPost, editPost, getPosts, likePost, unlikePost,
+			posts, postText, selectedMealToShare, selectMealToShare, addPost, editPost, getPosts, likePost, unlikePost,
 		} = useNewsfeedStore();
+		const isShareMealSelectionVisible = ref<boolean>(false);
 
-		getPosts();
+		const setShareMealSelectionVisible = (value: boolean) => {
+			isShareMealSelectionVisible.value = value;
+		};
 
-		const handlePostLike = ({ postId, hasLikedPost }) => {
-			console.log(hasLikedPost);
-			console.log(postId);
+		const handlePostLike = ({ postId, hasLikedPost }: { postId: number, hasLikedPost: boolean }) => {
 			const postIndex = posts.value.findIndex((postData) => postData.id === postId);
 
 			if (hasLikedPost) {
@@ -78,16 +96,22 @@ export default {
 			}
 		};
 
+		getPosts();
+
 		return {
 			userDetails,
 			postText,
 			posts,
+			selectedMealToShare,
+			isShareMealSelectionVisible,
+			selectMealToShare,
+			setShareMealSelectionVisible,
 			addPost,
 			editPost,
 			handlePostLike,
 		};
 	},
-};
+});
 </script>
 
 <style scoped lang="scss">

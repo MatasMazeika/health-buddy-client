@@ -14,6 +14,16 @@
 					<br>
 					{{ text }}
 				</p>
+				<NewsfeedMealDisplay
+					v-if="meal.mealFoods.length > 0"
+					:meal-name="meal.mealName"
+					:total-calories="meal.totalCalories"
+					:total-protein="meal.totalProtein"
+					:total-fat="meal.totalFat"
+					:total-carbs="meal.totalCarbs"
+					:total-amount="meal.totalAmount"
+					:meal-foods="meal.mealFoods"
+				/>
 			</div>
 			<nav class="level is-mobile">
 				<div class="level-left">
@@ -79,10 +89,12 @@ import Comment from '@/views/newsfeed/Comment.vue';
 import { useTextArea } from '@/use/useTextArea';
 import { useNewsfeedStore } from '@/store/newsfeedStore';
 import { CreatedAgo, Like } from '@/store/interface/newsfeedStoreInterface';
+import { Meal } from '@/store/interface/mealsInterface';
+import NewsfeedMealDisplay from '@/views/newsfeed/NewsfeedMealDisplay.vue';
 
 export default defineComponent({
 	name: 'Post',
-	components: { Comment },
+	components: { Comment, NewsfeedMealDisplay },
 	props: {
 		text: {
 			type: String,
@@ -111,6 +123,10 @@ export default defineComponent({
 		comments: {
 			type: Array,
 			default: () => [],
+		},
+		meal: {
+			type: Object as PropType<Meal>,
+			required: true,
 		},
 	},
 	setup(props) {
