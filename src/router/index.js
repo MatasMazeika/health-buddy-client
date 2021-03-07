@@ -6,6 +6,7 @@ import Workout from '@/views/dashboard/Workout.vue';
 import DailyFood from '@/views/dashboard/DailyFood.vue';
 import Newsfeed from '@/views/newsfeed/Newsfeed.vue';
 import UserSettings from '@/views/settings/UserSettings.vue';
+import Creator from '@/views/creator/Creator';
 
 export const LOGIN_ROUTE = '/login';
 export const REGISTER_ROUTE = '/register';
@@ -37,6 +38,9 @@ const routes = [
 		}, {
 			path: 'food',
 			component: DailyFood,
+		}, {
+			path: 'creator',
+			component: Creator,
 		}, {
 			path: 'newsfeed',
 			component: Newsfeed,
