@@ -38,6 +38,12 @@
 					Workout
 				</router-link>
 				<router-link
+					to="/dashboard/creator"
+					class="navbar-item"
+				>
+					Meal & Workout creator
+				</router-link>
+				<router-link
 					to="/dashboard/newsfeed"
 					class="navbar-item"
 				>
@@ -72,7 +78,6 @@ import { userDataStore } from '@/store/userDataStore';
 export default {
 	setup() {
 		const { userDetails } = userDataStore();
-		console.log(userDetails);
 
 		return {
 			userDetails,
