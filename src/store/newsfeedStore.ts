@@ -6,15 +6,30 @@ import {
 import { DateTime } from 'luxon';
 import { userDataStore } from '@/store/userDataStore';
 import { Comment, Post } from '@/store/interface/newsfeedStoreInterface';
+import { Meal } from '@/store/interface/mealsInterface';
 
 const posts = ref<Post[]>([]);
 const postText = ref<string>('');
 
 export const useNewsfeedStore = () => {
 	const { userDetails } = userDataStore();
+	const selectedMealToShare = ref<Meal>({
+		id: null,
+		mealFoods: [],
+		mealName: '',
+		totalCarbs: 0,
+		totalProtein: 0,
+		totalFat: 0,
+		totalCalories: 0,
+		totalAmount: 0,
+	});
 
 	const resetPostInput = () => {
 		postText.value = '';
+	};
+
+	const selectMealToShare = (meal: Meal) => {
+		selectedMealToShare.value = meal;
 	};
 
 	const editPostById = (postId: number, editedText: string) => {
@@ -50,15 +65,11 @@ export const useNewsfeedStore = () => {
 			createdAt: DateTime.local().toJSDate(),
 			postId,
 		});
-
-		console.log(posts.value[postIndex].comments);
 	};
 
 	const getPosts = async () => {
 		try {
 			const { data } = await getPostsApi();
-
-			console.log(data);
 
 			posts.value = data;
 		} catch (error) {
@@ -73,7 +84,7 @@ export const useNewsfeedStore = () => {
 			addPostToList(data);
 			resetPostInput();
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 		}
 	};
 
@@ -84,12 +95,11 @@ export const useNewsfeedStore = () => {
 			// editPostById();
 			resetPostInput();
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 		}
 	};
 
 	const likePost = async (postId: number, postIndex: number) => {
-		console.log(postId);
 		try {
 			await likePostApi({ postId });
 
@@ -101,7 +111,6 @@ export const useNewsfeedStore = () => {
 
 	const unlikePost = async (postId: number, postIndex: number) => {
 		try {
-			console.log(postId);
 			await unlikePostApi({ postId });
 
 			removePostLikeByPostIndex(postIndex);
@@ -123,6 +132,8 @@ export const useNewsfeedStore = () => {
 	return {
 		posts,
 		postText,
+		selectedMealToShare,
+		selectMealToShare,
 		getPosts,
 		addPost,
 		addComment,
