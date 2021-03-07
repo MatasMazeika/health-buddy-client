@@ -23,6 +23,7 @@
     "luxon": "^1.25.0",
     "moment": "^2.29.1",
     "quagga": "^0.12.1",
+    "round-to": "^5.0.0",
     "tailwindcss": "^2.0.2",
     "v-calendar": "^3.0.0-alpha.3",
     "vue": "^3.0.0",

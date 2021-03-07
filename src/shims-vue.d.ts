@@ -6,3 +6,5 @@ declare module '*.vue' {
 }
 
 declare module 'luxon';
+
+declare module 'lodash.debounce';
