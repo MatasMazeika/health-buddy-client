@@ -63,8 +63,6 @@ export default {
 			isAddExerciseModalVisible, iseEditSetModalVisible, dayExercises, startSetEditing, editExercise,
 		} = exerciseStore(props, context);
 
-		console.log(dayExercises);
-
 		return {
 			dayExercises,
 			isAddExerciseModalVisible,

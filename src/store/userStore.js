@@ -78,7 +78,6 @@ export const userStore = () => {
 			await router.push(`${DASHBOARD_ROUTE}/food`);
 		} catch (error) {
 			authErrors.value = getErrorMessage(error);
-			console.log(authErrors);
 		} finally {
 			isLoadingAuthentication.value = false;
 		}

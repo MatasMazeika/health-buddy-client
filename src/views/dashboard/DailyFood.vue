@@ -86,7 +86,6 @@ export default {
 
 		}, (err) => {
 			if (err) {
-				console.log(err);
 				return;
 			}
 
@@ -94,14 +93,13 @@ export default {
 
 			Quagga.onDetected((result) => {
 				if (!this.hasDetected) {
-					console.log(100);
 					axios.get(
 						`https://world.openfoodfacts.org/api/v0/product/${result.codeResult.code}.json`,
 					).then((resultt) => {
 						if (resultt.data.status !== 0) {
 							this.hasDetected = true;
 						}
-						console.log(resultt);
+
 						// eslint-disable-next-line camelcase
 						this.imgUrl = resultt?.data?.product?.image_front_url;
 					});

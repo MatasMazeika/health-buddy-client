@@ -148,8 +148,6 @@ export default {
 			}
 		};
 
-		console.log(userDetails);
-
 		onMounted(() => {
 			userSettings.value = {
 				...userDetails.value,

@@ -89,7 +89,6 @@ export const userDataStore = () => {
 			// @ts-ignore
 			.flatMap((key: any) => Object.values(consumedUserFood.value[key]));
 
-		console.log(allFood);
 		// @ts-ignore
 		return allFood.reduce((curr: ConsumedFood, acc: UserCaloricData) => ({
 			carbs: acc.carbs + curr.carbs,
@@ -100,8 +99,6 @@ export const userDataStore = () => {
 			carbs: 0, fat: 0, protein: 0, calories: 0,
 		});
 	});
-
-	console.log(totalConsumedUserCaloricData.value);
 
 	const setConsumedUserFood = (consumedFood: ConsumedFood[]) => {
 		consumedFood.forEach((food) => {
@@ -119,7 +116,6 @@ export const userDataStore = () => {
 	};
 
 	const setUserDetails = (details: UserDetails) => {
-		console.log(details);
 		userDetails.value = { ...details };
 	};
 
@@ -133,7 +129,7 @@ export const userDataStore = () => {
 
 	const initUser = async () => {
 		const { startDate, endDate } = getStartAndEndTimeOfToday();
-		console.log(startDate);
+
 		isLoadingUserData.value = true;
 
 		try {
@@ -164,14 +160,10 @@ export const userDataStore = () => {
 				data: { consumedFood },
 			} = await getConsumedFood({ startDate, endDate });
 
-			console.log(consumedFood);
-
 			resetUserFood();
 			setConsumedUserFood(consumedFood);
 		} catch (error) {
 			console.log(error);
-		} finally {
-			console.log('loaded');
 		}
 	};
 

@@ -25,7 +25,6 @@ const isAddExerciseModalVisible = ref(false);
 const iseEditSetModalVisible = ref(false);
 
 export const exerciseStore = (props, context) => {
-	console.log(context);
 	const isSaveExerciseAllowed = computed(() => currentAddingSets.value.length > 0 && exercise.value.name !== null);
 
 	const startSetEditing = ({
@@ -87,12 +86,11 @@ export const exerciseStore = (props, context) => {
 
 		try {
 			const { data } = await addExerciseApi({ name: exercise.value.name, sets: notAddedSets });
-			console.log(data);
 
 			addToDailyExerciseList(data);
 			resetExerciseInput();
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 		} finally {
 			isAddExerciseModalVisible.value = false;
 		}
@@ -111,7 +109,7 @@ export const exerciseStore = (props, context) => {
 
 			resetExerciseInput();
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 		} finally {
 			iseEditSetModalVisible.value = false;
 		}

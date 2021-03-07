@@ -96,8 +96,6 @@ export const useCaloryCalculation = () => {
 	const handleCaloryCalculation = () => {
 		const dailyCalories = calculateDailyCaloricIntake(calculationData);
 
-		console.log(gainMultiplier);
-		console.log(dailyCalories);
 		dailyCaloricData.calories = dailyCalories * gainMultiplier.value;
 		dailyCaloricData.macrocalories = calculateMacrocaloricIntake(dailyCalories);
 
