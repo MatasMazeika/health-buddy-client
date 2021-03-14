@@ -1,7 +1,10 @@
-import { ref, computed, reactive } from 'vue';
+import {
+	ref, computed, reactive, watch,
+} from 'vue';
 import { Meal, MealFood } from '@/store/interface/mealsInterface';
 import { createMealApi, getUserMealsApi } from '@/api/mealsApi';
 import roundTo from 'round-to';
+import debounce from 'lodash.debounce';
 
 const userMeals = ref<Meal[]>([]);
 
@@ -25,18 +28,26 @@ const mealFoodData = reactive<MealFood>({
 	calories: 0,
 	unit: 'gram',
 	amount: 0,
+	foodId: null,
 });
 
 const currentAddingMealFoods = ref<MealFood[]>([]);
 
 const mealName = ref<string>('');
+const mealSearchText = ref<string>('');
 
 export const mealsStore = () => {
+	const isLoadingUserMeals = ref<boolean>(false);
+
 	const currentAddingMealFoodsMultipliedWithAmount = computed(() => currentAddingMealFoods.value.map((mealFood) => ({
 		calories: roundTo(mealFood.calories * (mealFood.amount / 100), 2),
 		protein: roundTo(mealFood.protein * (mealFood.amount / 100), 2),
 		carbs: roundTo(mealFood.carbs * (mealFood.amount / 100), 2),
 		fat: roundTo(mealFood.fat * (mealFood.amount / 100), 2),
+		unit: mealFood.unit,
+		foodId: mealFood.id,
+		amount: mealFood.amount,
+		name: mealFood.name,
 	})));
 
 	const currentAddingMealMicrocaloriesSum = computed(
@@ -45,18 +56,26 @@ export const mealsStore = () => {
 			protein: roundTo(acc.protein + curr.protein, 2),
 			carbs: roundTo(acc.carbs + curr.carbs, 2),
 			fat: roundTo(acc.fat + curr.fat, 2),
+			amount: roundTo(acc.amount + curr.amount, 2),
 		}), {
-			calories: 0, protein: 0, carbs: 0, fat: 0,
+			calories: 0, protein: 0, carbs: 0, fat: 0, amount: 0,
 		}),
 	);
 
+	const currentAddingMealMicrocaloriesTotalAmount = computed(() => currentAddingMealMicrocaloriesSum.value.protein
+		+ currentAddingMealMicrocaloriesSum.value.carbs
+		+ currentAddingMealMicrocaloriesSum.value.fat);
+
 	const currentAddingMealFoodsPercentage = computed(() => {
-		const total = currentAddingMealMicrocaloriesSum.value.protein
-			+ currentAddingMealMicrocaloriesSum.value.carbs
-			+ currentAddingMealMicrocaloriesSum.value.fat;
-		const protein = Math.round((100 * currentAddingMealMicrocaloriesSum.value.protein) / total);
-		const carbs = Math.round((100 * currentAddingMealMicrocaloriesSum.value.carbs) / total);
-		const fat = Math.round((100 * currentAddingMealMicrocaloriesSum.value.fat) / total);
+		const protein = Math.round(
+			(100 * currentAddingMealMicrocaloriesSum.value.protein) / currentAddingMealMicrocaloriesTotalAmount.value,
+		);
+		const carbs = Math.round(
+			(100 * currentAddingMealMicrocaloriesSum.value.carbs) / currentAddingMealMicrocaloriesTotalAmount.value,
+		);
+		const fat = Math.round(
+			(100 * currentAddingMealMicrocaloriesSum.value.fat) / currentAddingMealMicrocaloriesTotalAmount.value,
+		);
 
 		return {
 			protein,
@@ -64,8 +83,6 @@ export const mealsStore = () => {
 			fat,
 		};
 	});
-
-	const isUserMealsAdded = computed(() => userMeals.value.length > 0);
 
 	const addFoodToCurrentAddingMealFoods = (mealFood: MealFood) => {
 		console.log(mealFood);
@@ -93,6 +110,10 @@ export const mealsStore = () => {
 		};
 	};
 
+	const setIsLoadingUserMeals = (value: boolean) => {
+		isLoadingUserMeals.value = value;
+	};
+
 	const setSelectedMeal = (meal: Meal) => {
 		selectedMeal.value = meal;
 	};
@@ -101,25 +122,30 @@ export const mealsStore = () => {
 		userMeals.value = meals;
 	};
 
-	const getUserMeals = async () => {
-		if (isUserMealsAdded.value) {
-			return;
-		}
+	const getUserMeals = debounce(async () => {
+		setIsLoadingUserMeals(true);
 
 		try {
-			const { data } = await getUserMealsApi();
+			const { data } = await getUserMealsApi(mealSearchText.value);
 			console.log(data);
 
 			setUserMeals(data.meals);
 		} catch (error) {
 			console.error(error);
+		} finally {
+			setIsLoadingUserMeals(false);
 		}
-	};
+	}, 200);
 
 	const createMeal = async () => {
 		const createMealData = {
 			mealName: mealName.value,
-			mealFoods: currentAddingMealFoods.value,
+			mealFoods: currentAddingMealFoodsMultipliedWithAmount.value,
+			totalAmount: currentAddingMealMicrocaloriesSum.value.amount,
+			totalCalories: currentAddingMealMicrocaloriesSum.value.calories,
+			totalProtein: currentAddingMealMicrocaloriesSum.value.protein,
+			totalFat: currentAddingMealMicrocaloriesSum.value.fat,
+			totalCarbs: currentAddingMealMicrocaloriesSum.value.carbs,
 		};
 
 		try {
@@ -131,6 +157,10 @@ export const mealsStore = () => {
 		}
 	};
 
+	watch(mealSearchText, () => {
+		getUserMeals();
+	});
+
 	return {
 		userMeals: computed(() => userMeals.value),
 		selectedMeal: computed(() => selectedMeal.value),
@@ -140,6 +170,8 @@ export const mealsStore = () => {
 		currentAddingMealFoodsPercentage,
 		currentAddingMealFoods,
 		mealName,
+		mealSearchText,
+		isLoadingUserMeals,
 		createMeal,
 		removeCurrentAddingMealFoodByIndex,
 		addFoodToCurrentAddingMealFoods,

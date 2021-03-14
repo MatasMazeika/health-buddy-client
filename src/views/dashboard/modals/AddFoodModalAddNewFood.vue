@@ -90,7 +90,7 @@ import { addFoodStore } from '@/store/addFoodStore';
 export default defineComponent({
 	setup() {
 		const { addFoodData, enteredFoodPercentages, selectedFoodWithAmount } = addFoodStore();
-		console.log(selectedFoodWithAmount.value);
+
 		return {
 			addFoodData,
 			enteredFoodPercentages,

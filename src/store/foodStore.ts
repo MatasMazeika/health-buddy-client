@@ -16,8 +16,8 @@ export const foodStore = () => {
 		isLoadingFood.value = value;
 	};
 
-	const getFood = debounce(async (foodName: string) => {
-		setIsLoadingFood(false);
+	const getFood = debounce(async (foodName: string = '') => {
+		setIsLoadingFood(true);
 
 		try {
 			const { data } = await getFoodsApi(foodName);

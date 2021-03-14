@@ -1,35 +1,43 @@
 import {
 	reactive,
 	ref,
-	watch,
 	computed,
 	readonly,
 } from 'vue';
 import { api } from '@/api/api';
-import debounce from 'lodash.debounce';
 import { userDataStore } from '@/store/userDataStore';
 import { addFoodApi } from '@/api/foodApi';
+import { Meal } from '@/store/interface/mealsInterface';
+import { Food, ConsumedFood, TimeOfDay } from '@/store/interface/foodInterface';
+import { saveConsumedFoodApi, saveMultipleConsumedFoods } from '@/api/ConsumedFoodApi';
 
-const FOOD_API = `${process.env.VUE_APP_API_URL}/food`;
-const CONSUMED_FOOD_API = `${process.env.VUE_APP_API_URL}/consumed-food`;
-
-export const getFoodApi = (search) => api.get(`${FOOD_API}?search=${search}`);
-
-export const saveConsumedFoodApi = (food) => api.post(CONSUMED_FOOD_API, food);
-
-const isLoadingUserFood = ref(false);
+const isLoadingUserFood = ref<boolean>(false);
 
 const foodName = ref('');
 const loadedFood = ref([]);
-const selectedFood = ref({
-	name: null,
-	calories: null,
-	protein: null,
-	carbs: null,
-	fat: null,
+
+const selectedFood = ref<ConsumedFood>({
+	id: null,
+	name: '',
+	calories: 0,
+	protein: 0,
+	carbs: 0,
+	fat: 0,
 	unit: 'gram',
-	amount: null,
-	timeOfDay: null,
+	amount: 0,
+	foodId: null,
+	timeOfDay: 'breakfast',
+});
+
+const selectedMeal = ref<Meal>({
+	id: null,
+	mealFoods: [],
+	mealName: '',
+	totalCarbs: 0,
+	totalProtein: 0,
+	totalFat: 0,
+	totalCalories: 0,
+	totalAmount: 0,
 });
 
 const addFoodData = reactive({
@@ -41,6 +49,8 @@ const addFoodData = reactive({
 	calories: 0,
 	unit: 'gram',
 });
+
+const timeOfDay = ref<TimeOfDay>('breakfast');
 
 export const addFoodStore = () => {
 	const { addFoodToConsumedList } = userDataStore();
@@ -54,18 +64,18 @@ export const addFoodStore = () => {
 		});
 
 		return {
-			calories: Math.round(selectedFood.value.calories * (addFoodData.amount / 100)),
-			protein: Math.round(selectedFood.value.protein * (addFoodData.amount / 100)),
-			carbs: Math.round(selectedFood.value.carbs * (addFoodData.amount / 100)),
-			fat: Math.round(selectedFood.value.fat * (addFoodData.amount / 100)),
+			calories: Number(Math.round(selectedFood.value.calories * (addFoodData.amount / 100))) || 0,
+			protein: Number(Math.round(selectedFood.value.protein * (addFoodData.amount / 100))) || 0,
+			carbs: Number(Math.round(selectedFood.value.carbs * (addFoodData.amount / 100))) || 0,
+			fat: Number(Math.round(selectedFood.value.fat * (addFoodData.amount / 100))) || 0,
 		};
 	});
 
 	const selectedFoodPercentages = computed(() => {
 		const total = selectedFood.value.protein + selectedFood.value.carbs + selectedFood.value.fat;
-		const protein = Math.round((100 * selectedFood.value.protein) / total);
-		const carbs = Math.round((100 * selectedFood.value.carbs) / total);
-		const fat = Math.round((100 * selectedFood.value.fat) / total);
+		const protein = Math.round((100 * selectedFood.value.protein) / total) || 0;
+		const carbs = Math.round((100 * selectedFood.value.carbs) / total) || 0;
+		const fat = Math.round((100 * selectedFood.value.fat) / total) || 0;
 
 		return {
 			protein,
@@ -88,17 +98,7 @@ export const addFoodStore = () => {
 		};
 	});
 
-	const uniqueLoadedFood = computed(() => [...new Map(loadedFood.value.map((item) => [item.name, item])).values()]);
-
-	const setLoadingFood = (value) => {
-		isLoadingUserFood.value = value;
-	};
-
-	const addFoodToList = (food) => {
-		loadedFood.value = [...loadedFood.value, ...food];
-	};
-
-	const selectFood = (food) => {
+	const selectFood = (food: Food) => {
 		addFoodData.amount = food.amount;
 		selectedFood.value = {
 			...selectedFood.value,
@@ -106,19 +106,10 @@ export const addFoodStore = () => {
 		};
 	};
 
-	const searchFood = debounce(async () => {
-		setLoadingFood(true);
-
-		try {
-			const { data } = await getFoodApi(foodName.value);
-
-			addFoodToList(data.food);
-		} catch (error) {
-			console.error(error);
-		} finally {
-			setLoadingFood(false);
-		}
-	}, 600);
+	const setSelectedMeal = (meal: Meal) => {
+		console.log(meal);
+		selectedMeal.value = meal;
+	};
 
 	const saveConsumedFood = () => {
 		const consumedFood = {
@@ -129,13 +120,34 @@ export const addFoodStore = () => {
 			calories: selectedFoodWithAmount.value.calories,
 			unit: 'gram',
 			amount: addFoodData.amount,
-			timeOfDay: selectedFood.value.timeOfDay,
-			foodId: selectedFood.value.id,
+			timeOfDay: timeOfDay.value,
+			foodId: selectedFood.value.foodId,
 		};
 
 		try {
 			addFoodToConsumedList(consumedFood);
 			saveConsumedFoodApi(consumedFood);
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const saveConsumedMeal = async () => {
+		const consumedMealFoods = selectedMeal.value.mealFoods.map((mealFood) => ({
+			amount: mealFood.amount,
+			calories: mealFood.calories,
+			carbs: mealFood.carbs,
+			fat: mealFood.fat,
+			foodId: mealFood.foodId,
+			name: mealFood.name,
+			protein: mealFood.protein,
+			unit: mealFood.unit,
+			timeOfDay: timeOfDay.value,
+		}));
+
+		try {
+			await saveMultipleConsumedFoods(consumedMealFoods);
+			consumedMealFoods.forEach((consumedMealFood) => addFoodToConsumedList(consumedMealFood));
 		} catch (error) {
 			console.error(error);
 		}
@@ -154,21 +166,19 @@ export const addFoodStore = () => {
 		}
 	};
 
-	watch(foodName, () => {
-		searchFood();
-	});
-
 	return {
 		selectFood,
+		setSelectedMeal,
+		saveConsumedMeal,
 		saveConsumedFood,
 		addFood,
+		timeOfDay,
+		selectedMeal,
 		enteredFoodPercentages,
 		addFoodData,
 		selectedFoodWithAmount,
 		selectedFood,
 		selectedFoodPercentages,
-		uniqueLoadedFood,
-		searchFood,
 		loadedFood,
 		isLoadingUserFood,
 		foodName,

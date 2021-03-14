@@ -23,12 +23,14 @@
 
 		<div
 			id="navbarBasicExample"
-			class="navbar-menu">
+			class="navbar-menu"
+		>
 			<div class="navbar-start">
 				<router-link
 					to="/dashboard/food"
 					class="navbar-item"
-				>Food
+				>
+					Food
 				</router-link>
 
 				<router-link

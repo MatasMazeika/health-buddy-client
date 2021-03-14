@@ -20,41 +20,12 @@
 							{{ tab.title }}
 						</a>
 					</p>
-					<div v-if="!isAddFoodTabOpen">
-						<div class="panel-block">
-							<p class="control has-icons-left">
-								<input
-									class="input is-normal"
-									:class="{
-									'is-loading': isLoadingUserFood
-								}"
-									type="text"
-									placeholder="Enter food name"
-									v-model.trim="foodName"
-								>
-								<span class="icon is-left">
-								<i
-									class="fas fa-search"
-									aria-hidden="true"></i>
-								</span>
-							</p>
-						</div>
-						<a
-							class="panel-block is-active"
-							v-for="food in uniqueLoadedFood"
-							:key="`${food.name}${food.calories}`"
-							@click="selectFood(food)"
-						>
-							<span class="panel-icon">
-								<i class="fas fa-drumstick-bite"></i>
-							</span>
-							<span>
-								{{ food.name }}
-							</span>
-						</a>
-					</div>
 				</article>
-				<component :is="currentTab.component"/>
+				<component
+					:is="currentTab.component"
+					@select-food="selectFood($event)"
+					@select-meal="setSelectedMeal($event)"
+				/>
 				<footer class="modal-card-foot">
 					<button
 						class="button is-success"
@@ -79,8 +50,12 @@ import { ref, computed } from 'vue';
 import { addFoodStore } from '@/store/addFoodStore';
 import AddFoodModalAddNewFood from '@/views/dashboard/modals/AddFoodModalAddNewFood.vue';
 import AddFoodModalSelectFood from '@/views/dashboard/modals/AddFoodModalSelectFood.vue';
+import FoodSearch from '@/components/FoodSearch';
+import MealSearch from '@/components/MealSearch';
+import AddFoodModalTabMeals from '@/views/dashboard/modals/AddFoodModalTabMeals';
 
 const TAB_ID_ADD_FOOD = 'add-food';
+const TAB_ID_MEALS = 'meals';
 
 const TABS = [
 	{
@@ -95,7 +70,8 @@ const TABS = [
 	},
 	{
 		title: 'Meals',
-		id: 'meals',
+		id: TAB_ID_MEALS,
+		component: 'AddFoodModalTabMeals',
 	},
 ];
 
@@ -103,6 +79,9 @@ export default {
 	components: {
 		AddFoodModalSelectFood,
 		AddFoodModalAddNewFood,
+		AddFoodModalTabMeals,
+		FoodSearch,
+		MealSearch,
 	},
 	props: {
 		isOpen: {
@@ -114,6 +93,8 @@ export default {
 		const {
 			saveConsumedFood,
 			addFood,
+			setSelectedMeal,
+			saveConsumedMeal,
 			uniqueLoadedFood,
 			foodName,
 			loadedFood,
@@ -135,6 +116,8 @@ export default {
 		const handleFoodAdd = async () => {
 			if (currentTab.value.id === TAB_ID_ADD_FOOD) {
 				await addFood();
+			} else if (currentTab.value.id === TAB_ID_MEALS) {
+				await saveConsumedMeal();
 			} else {
 				saveConsumedFood();
 			}
@@ -146,6 +129,7 @@ export default {
 			TABS,
 			currentTab,
 			handleFoodAdd,
+			setSelectedMeal,
 			saveConsumedFood,
 			setCurrentTab,
 			isAddFoodTabOpen,

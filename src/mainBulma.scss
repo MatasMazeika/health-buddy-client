@@ -1,0 +1,35 @@
+$primary: #E2E2E2;
+$primaryB: #141414;
+$link: #276EF1;
+$info: #276EF1;
+$success: #03703C;
+$warning: #BC8B2C;
+$danger: #AB1300;
+
+$contentPrimary: $primary;
+$contentSecondary: #AFAFAF;
+$contentTriatary: #757575;
+
+$text: $primary;
+$label-color: $primary;
+
+$background: #141414;
+$box-background-color: $background;
+$table-background-color: $background;
+$table-color: $contentTriatary;
+$table-head-cell-color: $contentSecondary;
+
+$border: #333333 1px solid;
+
+html, body {
+	background-color: $primaryB;
+}
+
+@import "~bulma";
+@import "~bulma-slider";
+
+.img-max-height-fit {
+	max-height: 100% !important;
+	height: 100% !important;
+	object-fit: cover;
+}

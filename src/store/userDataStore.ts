@@ -1,6 +1,8 @@
 import { reactive, ref, computed } from 'vue';
 import { api } from '@/api/api';
 import { getStartAndEndTimeOfToday } from '@/views/utils/time';
+import { ConsumedFood, ConsumedUserFood } from '@/store/interface/foodInterface';
+import { exerciseStore } from './exerciseStore';
 
 const USER_API = `${process.env.VUE_APP_API_URL}/user-data`;
 const CONSUMED_FOOD_API = `${process.env.VUE_APP_API_URL}/consumed-food`;
@@ -18,29 +20,6 @@ interface UserCaloricData {
 	fat: number
 	protein: number
 	calories: number
-}
-
-interface ConsumedFood {
-	amount: number
-	calories: number
-	carbs: number
-	createdAt: Date
-	fat: number
-	foodId: number
-	id: number
-	name: string
-	protein: 12
-	timeOfDay: 'breakfast' | 'lunch' | 'supper' | 'snacks'
-	unit: 'gram'
-	updatedAt: Date
-	userId: number
-}
-
-interface ConsumedUserFood {
-	breakfast: ConsumedFood[],
-	lunch: ConsumedFood[],
-	supper: ConsumedFood[],
-	snacks: ConsumedFood[],
 }
 
 interface StartEndDate {
@@ -83,6 +62,7 @@ const consumedUserFood = ref<ConsumedUserFood>({
 const isLoadingUserData = ref(false);
 
 export const userDataStore = () => {
+	const { setDayExercises } = exerciseStore();
 	const totalConsumedUserCaloricData = computed(() => {
 		const allFood = Object
 			.keys(consumedUserFood.value)
@@ -135,7 +115,7 @@ export const userDataStore = () => {
 		try {
 			const {
 				data: {
-					consumedFood, username, email, avatar, carbs, fat, protein, calories,
+					consumedFood, username, email, avatar, carbs, fat, protein, calories, dailyExercises,
 				},
 			} = await getInitiationUserData({
 				startDate,
@@ -147,6 +127,7 @@ export const userDataStore = () => {
 			setUserCaloricData({
 				carbs, fat, protein, calories,
 			});
+			setDayExercises(dailyExercises);
 		} catch (error) {
 			console.log(error);
 		} finally {

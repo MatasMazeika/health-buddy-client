@@ -5,14 +5,14 @@
 				<p
 					class="control has-icons-left"
 					:class="{
-						'is-loading': isLoadingFood
+						'is-loading': isLoadingUserMeals
 					}"
 				>
 					<input
 						class="input is-normal"
 						type="text"
 						placeholder="Enter food name"
-						v-model.trim="foodSearch"
+						v-model.trim="mealSearchText"
 					>
 					<span class="icon is-left">
 					<i
@@ -25,15 +25,15 @@
 		<div class="search-container">
 			<a
 				class="panel-block is-active"
-				v-for="food in foodList"
-				:key="food._id"
-				@click="$emit('select-food', {...food._source})"
+				v-for="meal in userMeals"
+				:key="meal.id"
+				@click="$emit('select-meal', meal)"
 			>
 				<span class="panel-icon">
 					<i class="fas fa-drumstick-bite"></i>
 				</span>
 				<span>
-					{{ food._source.name }}
+					{{ meal.mealName }}
 				</span>
 			</a>
 		</div>
@@ -42,22 +42,21 @@
 
 <script>
 import { defineComponent, ref } from 'vue';
-import { foodStore } from '@/store/foodStore';
+import { mealsStore } from '@/store/mealsStore';
 
 export default defineComponent({
-	name: 'FoodSearch',
+	name: 'MealSearch',
 	setup() {
 		const {
-			getFood, foodSearch, isLoadingFood, foodList,
-		} = foodStore();
+			mealSearchText, userMeals, isLoadingUserMeals, getUserMeals,
+		} = mealsStore();
 
-		getFood();
+		getUserMeals();
 
 		return {
-			foodList,
-			isLoadingFood,
-			foodSearch,
-			getFood,
+			mealSearchText,
+			userMeals,
+			isLoadingUserMeals,
 		};
 	},
 });

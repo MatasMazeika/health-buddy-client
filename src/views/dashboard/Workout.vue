@@ -23,9 +23,9 @@
 						</thead>
 						<tbody>
 						<tr
-							v-for="({ name, sets }, exerciseIndex) in dayExercises"
+							v-for="({ name, sets, id }, exerciseIndex) in dayExercises"
 							:key="`${name}${exerciseIndex}`">
-							<td @click="editExercise({name, sets}, exerciseIndex)">{{ name }}</td>
+							<td @click="setEditExercise({name, sets, id}, exerciseIndex)">{{ name }}</td>
 							<td
 								v-for="({weight, repetitions}, setIndex) in sets"
 								:key="`${weight}${repetitions}${name}`"
@@ -60,14 +60,14 @@ export default {
 	components: { EditSetModal, AddNewExerciseModal },
 	setup(props, context) {
 		const {
-			isAddExerciseModalVisible, iseEditSetModalVisible, dayExercises, startSetEditing, editExercise,
+			isAddExerciseModalVisible, iseEditSetModalVisible, dayExercises, startSetEditing, setEditExercise,
 		} = exerciseStore(props, context);
 
 		return {
 			dayExercises,
 			isAddExerciseModalVisible,
 			iseEditSetModalVisible,
-			editExercise,
+			setEditExercise,
 			startSetEditing,
 		};
 	},

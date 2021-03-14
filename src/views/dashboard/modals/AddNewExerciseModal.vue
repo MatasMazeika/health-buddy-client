@@ -43,7 +43,7 @@
 						<button
 							class="button is-success margin-left-auto"
 							:disabled="!isSaveExerciseAllowed"
-							@click="addExercise">Save exercise
+							@click="isEditingExercise ? editExercise() : addExercise()">Save exercise
 						</button>
 					</div>
 				</div>
@@ -77,6 +77,8 @@ export default {
 			exercise,
 			currentAddingSets,
 			isSaveExerciseAllowed,
+			isEditingExercise,
+			editExercise,
 			addSetToCurrentAddingSets,
 			addExercise,
 		} = exerciseStore();
@@ -85,6 +87,8 @@ export default {
 			exercise,
 			currentAddingSets,
 			isSaveExerciseAllowed,
+			isEditingExercise,
+			editExercise,
 			addSetToCurrentAddingSets,
 			addExercise,
 		};

@@ -7,6 +7,7 @@ export interface MealFood {
 	calories: number
 	unit: string
 	amount: number
+	foodId: number | null
 }
 
 export interface Meal {

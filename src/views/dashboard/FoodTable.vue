@@ -55,13 +55,13 @@ const MEAL_TYPES = ['breakfast', 'lunch', 'supper', 'snacks'];
 export default {
 	components: { AddFoodModal },
 	setup() {
-		const { selectedFood } = addFoodStore();
+		const { timeOfDay } = addFoodStore();
 		const { consumedUserFood } = userDataStore();
 		const isAddFoodModalVisible = ref(false);
 
 		const setAddFoodModalVisible = (value, mealType = 'breakfast') => {
 			isAddFoodModalVisible.value = value;
-			selectedFood.value.timeOfDay = mealType;
+			timeOfDay.value = mealType;
 		};
 
 		return {

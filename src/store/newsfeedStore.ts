@@ -79,7 +79,7 @@ export const useNewsfeedStore = () => {
 
 	const addPost = async () => {
 		try {
-			const { data } = await addPostApi({ text: postText.value });
+			const { data } = await addPostApi({ text: postText.value, mealId: selectedMealToShare.value.id });
 
 			addPostToList(data);
 			resetPostInput();

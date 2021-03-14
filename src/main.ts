@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import 'bulma';
+import './mainBulma.scss';
 import './main.scss';
 import '@fortawesome/fontawesome-free/js/brands';
 import '@fortawesome/fontawesome-free/js/solid';

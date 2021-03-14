@@ -8,10 +8,44 @@
 							<span>Your meals</span>
 							<button
 								class="button is-info"
-								@click="setCreateMealModalOpen(true)">Create new meal
+								@click="setCreateMealModalOpen(true)"
+							>
+								Create new meal
 							</button>
 						</div>
-						<MealSearch @select-meal="setSelectedMeal($event)" />
+						<p class="panel-tabs">
+							<a class="is-active">Recent</a>
+							<a>All</a>
+						</p>
+						<div class="panel-block">
+							<p class="control has-icons-left">
+								<input
+									class="input is-primary"
+									type="text"
+									placeholder="Search">
+								<span class="icon is-left">
+								<i
+									class="fas fa-search"
+									aria-hidden="true"></i>
+								</span>
+							</p>
+						</div>
+						<a
+							class="panel-block is-active"
+							v-for="meal in userMeals"
+							:key="meal.id"
+							@click="setSelectedMeal(meal)"
+						>
+							<span class="panel-icon">
+								<i class="fas fa-drumstick-bite"></i>
+							</span>
+							<span>
+								{{ meal.mealName }}
+							</span>
+							<div class="ml-6">
+								Calories {{ meal.totalCalories }}
+							</div>
+						</a>
 					</article>
 				</div>
 			</div>
@@ -52,9 +86,6 @@
 				</div>
 			</div>
 		</div>
-		<CreateMealModal
-			v-if="isCreateMealModalOpen"
-			@close="setCreateMealModalOpen(false)"/>
 	</div>
 </template>
 
@@ -62,31 +93,11 @@
 import { defineComponent, ref } from 'vue';
 import { mealsStore } from '@/store/mealsStore';
 import CreateMealModal from '@/views/dashboard/modals/CeateMealModal.vue';
-import MealSearch from '@/components/MealSearch';
 
 export default defineComponent({
-	components: { CreateMealModal, MealSearch },
+	components: { CreateMealModal },
 	setup() {
-		const {
-			userMeals, selectedMeal, setSelectedMeal, getUserMeals, mealSearchText,
-		} = mealsStore();
-		const isCreateMealModalOpen = ref(false);
 
-		const setCreateMealModalOpen = (value) => {
-			isCreateMealModalOpen.value = value;
-		};
-
-		getUserMeals();
-
-		return {
-			mealSearchText,
-			userMeals,
-			selectedMeal,
-			isCreateMealModalOpen,
-			setSelectedMeal,
-			getUserMeals,
-			setCreateMealModalOpen,
-		};
 	},
 });
 </script>
